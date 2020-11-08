@@ -1,5 +1,5 @@
 {
-    "name": "team-reflex/discord-php",
+    "name": "curiolabs/discord-php",
     "description": "An unofficial API to interact with the voice and text service Discord.",
     "license": "MIT",
     "authors": [
@@ -8,8 +8,12 @@
             "email": "david@team-reflex.com"
         },
         {
-            "name": "Aaron Scherer",
+            ",
             "email": "aequasi@gmail.com"
+        },
+        {
+            "name": "Steven Wright",
+            "email": "steven.p.wright@gmail.com"
         }
     ],
     "require": {
