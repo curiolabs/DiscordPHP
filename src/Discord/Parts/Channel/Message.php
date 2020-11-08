@@ -406,6 +406,35 @@ class Message extends Part
     }
 
     /**
+     * Gets the reaction to the message emoji.
+     *
+     * @param Emoji|string $emoticon The emoticon to react with. (custom: ':michael:251127796439449631')
+     * @param array $params 'before', 'after' and 'limit'.  Default 'limit' = 25 records
+     *
+     * @return ExtendedPromiseInterface
+     */
+    public function getReaction($emoticon, $params = []): ExtendedPromiseInterface
+    {
+        $deferred = new Deferred();
+
+        if ($emoticon instanceof Emoji) {
+            $emoticon = $emoticon->toReactionString();
+        }
+
+        $emoticon = urlencode($emoticon);
+
+        $this->http->get(
+            "channels/{$this->channel->id}/messages/{$this->id}/reactions/{$emoticon}", $params
+        )->done(
+            Bind([$deferred, 'resolve']),
+            Bind([$deferred, 'reject'])
+        );
+
+        return $deferred->promise();
+    }
+
+
+    /**
      * Deletes a reaction.
      *
      * @param int               $type     The type of deletion to perform.
