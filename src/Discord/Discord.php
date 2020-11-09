@@ -13,8 +13,10 @@ namespace Discord;
 
 use Discord\Exceptions\IntentException;
 use Discord\Factory\Factory;
+use Discord\Helpers\Collection;
 use Discord\Http\Http;
 use Discord\Http\ReactDriver;
+use Discord\Parts\Guild\Emoji;
 use Discord\Parts\Guild\Guild;
 use Discord\Parts\OAuth\Application;
 use Discord\Parts\Part;
@@ -47,6 +49,7 @@ use Evenement\EventEmitterTrait;
 use React\Promise\ExtendedPromiseInterface;
 use React\Promise\PromiseInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use function React\Partial\bind as Bind;
 use function React\Promise\reject as Reject;
 use function React\Promise\resolve as Resolve;
 
@@ -63,6 +66,7 @@ use function React\Promise\resolve as Resolve;
  * @property string                   $discriminator The unique discriminator of the client.
  * @property bool                     $bot           Whether the client is a bot.
  * @property User                     $user          The user instance of the client.
+ * @property Guild                    $guild         The guild instance of the client
  * @property Application              $application   The OAuth2 application of the bot.
  * @property GuildRepository          $guilds
  * @property PrivateChannelRepository $private_channels
@@ -469,6 +473,8 @@ class Discord
         $this->on(Event::GUILD_CREATE, $function);
     }
 
+
+
     /**
      * Handles `GUILD_MEMBERS_CHUNK` packets.
      *
@@ -553,6 +559,8 @@ class Discord
         });
 
         $ws->on('message', [$this, 'handleWsMessage']);
+        $ws->on('MESSAGE_REACTION_ADD', [$this, 'handleWsMessage']);
+        $ws->on('MESSAGE_REACTION_REMOVE', [$this, 'handleWsMessage']);
         $ws->on('close', [$this, 'handleWsClose']);
         $ws->on('error', [$this, 'handleWsError']);
     }
@@ -651,6 +659,7 @@ class Discord
         $this->logger->error('websocket error', ['e' => $e->getMessage()]);
         $this->emit('error', [$e, $this]);
     }
+
 
     /**
      * Handles dispatch events received by the WebSocket.
@@ -1490,4 +1499,5 @@ class Discord
 
         return $config;
     }
+
 }

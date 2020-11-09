@@ -405,6 +405,32 @@ class Message extends Part
         return $deferred->promise();
     }
 
+
+    public function getAllUsers()
+    {
+
+        $deferred = new Deferred();
+
+        $this->http->get("guilds/{$this->author->guild_id}/members?limit=1000")
+            ->done(function ($response) use ($deferred) {
+
+                $users = new Collection();
+                foreach ($response as $obj) {
+                    $user = new \StdClass();
+                    $user->id = $obj->user->id;
+                    $user->username = $obj->user->username;
+                    $user->nick = $obj->nick ? $obj->nick : $obj->user->username;
+                    $users->push($user);
+                }
+                $deferred->resolve($users);
+            },
+                Bind([$deferred, 'reject'])
+            );
+
+        return $deferred->promise();
+    }
+
+
     /**
      * Gets the reaction to the message emoji.
      *
@@ -423,12 +449,16 @@ class Message extends Part
 
         $emoticon = urlencode($emoticon);
 
-        $this->http->get(
-            "channels/{$this->channel->id}/messages/{$this->id}/reactions/{$emoticon}", $params
-        )->done(
-            Bind([$deferred, 'resolve']),
-            Bind([$deferred, 'reject'])
-        );
+        $this->http->get("channels/{$this->channel->id}/messages/{$this->id}/reactions/{$emoticon}")
+            ->done(function ($response) use ($deferred) {
+                    $users = new Collection();
+                    foreach ($response as $user) {
+                        $users->push($user);
+                    }
+                    $deferred->resolve($users);
+                },
+                Bind([$deferred, 'reject'])
+            );
 
         return $deferred->promise();
     }
@@ -568,6 +598,29 @@ class Message extends Part
 
         return $deferred->promise();
     }
+
+
+    /**
+     * Sets the content of the message.
+     *
+     * @param string $string
+     *
+     * @return ExtendedPromiseInterface
+     */
+    public function setContent($string): ExtendedPromiseInterface
+    {
+        $deferred = new Deferred();
+
+        $this->http->patch("channels/{$this->channel_id}/messages/{$this->id}", [
+            'content' => $string,
+        ])->done(function ($data) use ($deferred) {
+            $this->fill((array) $data);
+            $deferred->resolve($this);
+        }, Bind([$deferred, 'reject']));
+
+        return $deferred->promise();
+    }
+
 
     /**
      * {@inheritdoc}
