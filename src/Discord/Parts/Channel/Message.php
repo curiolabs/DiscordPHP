@@ -420,6 +420,7 @@ class Message extends Part
                     $user->id = $obj->user->id;
                     $user->username = $obj->user->username;
                     $user->nick = $obj->nick ? $obj->nick : $obj->user->username;
+                    $user->bot = isset($obj->bot) ? $obj->bot : 0;
                     $users->push($user);
                 }
                 $deferred->resolve($users);
